@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: playground
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: playgroundconfig
+  namespace: playground
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: playing-with-rapidapi
+    group: playing-with-rapidapi
+  name: playing-with-rapidapi
+  namespace: playground
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: playing-with-secrets
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: playing-with-rapidapi
+    spec:
+      containers:
+      - image: solthoth/playing-with-rapidapi:latest
+        name: playing-with-rapidapi-api
+        resources: {}
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: vault
+    group: playing-with-rapidapi
+  name: vault
+  namespace: playground
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: vault
+    spec:
+      containers:
+      - image: vault:1.5.5
+        name: vault
+        resources: {}
+status: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: playground-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: playground
+spec:
+  rules:
+  - http:
+      paths:
+      - host: playground-api.domain.com
+        backend:
+          service:
+            name: playing-with-rapidapi-app
+            port:
+              number: 80
+      - host: playground-vault.domain.com
+        backend:
+          service:
+            name: vault
+            port:
+              number: 8200
